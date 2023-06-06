@@ -1,0 +1,38 @@
+# Databricks notebook source
+data
+RechargeID|RechageDate|Remaining_days|validity						
+R201623|20200511|1|online						
+R201873|20200119|110|online						
+R201999|20200105|35|online						
+R201951|20191105|215|online						
+
+
+
+df = spark.read.option("delimiter","|").option("inferschema","True").csv("dbfs:/FileStore/pyspark03.csv",header = True)
+df.printSchema()
+
+# COMMAND ----------
+
+#adding date and remaining days will give the expiry date. To add we will use to_date func which will add but will take date as a data type so we need to convert
+#integer into date which can not be converted directly hence will first convert it to string and then date
+from pyspark.sql.functions import to_date,col
+df.select(to_date(col("RechageDate").cast("String"),"yyyyMMdd")).show()
+
+# COMMAND ----------
+
+df2 = df.withColumn("date_new_format",to_date(col("RechageDate").cast("String"),"yyyyMMdd"))
+df2.show()
+
+# COMMAND ----------
+
+from pyspark.sql.functions import date_add,expr
+df2.select("*",expr("date_add(date_new_format,Remaining_days)")).show()
+
+# COMMAND ----------
+
+df3 = df2.withColumn("expiry_date",date_add("date_new_format","Remaining_days"))
+df3.show()
+
+# COMMAND ----------
+
+
