@@ -1,0 +1,89 @@
+# Databricks notebook source
+data1
+Name|Age	
+eshan	 rai|21
+sanchi	 rai|22
+neeta	 rai|23
+
+
+data2
+Name|Age|Gender			
+ritika	 jain|21|Male		
+ujjawal	 kumar|22|female		
+suzie	 pandey|23|male		
+
+
+df1 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_01.csv",header=True)
+df2 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_02.csv",header = True)
+df1.show()
+df2.show()
+
+
+
+
+
+
+# COMMAND ----------
+
+#add column 
+from pyspark.sql.functions import lit
+df1_add = df1.withColumn("Gender", lit("Null"))
+df1_add.show()
+
+# COMMAND ----------
+
+df1_add.union(df2).show()
+
+# COMMAND ----------
+
+from pyspark.sql.types import *
+schema = StructType([
+                     StructField(name = "Name", dataType = StringType()),
+                     StructField(name = "Age", dataType = StringType()),
+                     StructField(name = "Gender", dataType = StringType())])
+
+# COMMAND ----------
+
+#Union method
+df4 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_01.csv",header=True,schema=schema)
+df5 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_02.csv",header = True,schema=schema)
+
+# COMMAND ----------
+
+df4.union(df5).show()
+
+# COMMAND ----------
+
+#outer join method
+df6 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_01.csv",header=True)
+df7 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_02.csv",header = True)
+
+# COMMAND ----------
+
+df9 = df6.join(df7,on=["Name","Age"],how="outer")
+df9.show()
+
+# COMMAND ----------
+
+#automated method
+df10 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_01.csv",header=True)
+df11 = spark.read.option("delimiter","|").csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/pyspark02_02.csv",header=True)
+list3 = list(set(df10.columns) - set(df11.columns))
+list4 = list(set(df11.columns) - set(df10.columns))
+
+# COMMAND ----------
+
+for i in list3:
+    df11 = df11.withColumn(i,lit("Null"))
+    
+for i in list4:
+    df10 = df10.withColumn(i,lit("Null"))
+
+# COMMAND ----------
+
+df2 = df10.union(df11)
+df2.show()
+
+# COMMAND ----------
+
+
