@@ -1,0 +1,27 @@
+Source file
+Name~|Age
+eshan, rai~|21
+sanchi, rai~|22
+ritika, jai~|23
+sagar, bhatt~|24
+
+# Databricks notebook source
+df = spark.read.text("dbfs:/FileStore/pyspark01.csv")
+df.show(truncate = 0)
+
+# COMMAND ----------
+
+header = df.first()[0]
+header
+
+# COMMAND ----------
+
+schema = header.split("~|")
+schema
+
+# COMMAND ----------
+
+df2 = df.filter(df["value"] != header).rdd.map(lambda x:x[0].split("~|")).toDF(schema)
+df2.show()
+
+# COMMAND ----------
