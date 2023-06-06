@@ -1,0 +1,35 @@
+# Databricks notebook source
+from pyspark.sql import SparkSession,types
+
+# COMMAND ----------
+
+spark = SparkSession.builder.master("Local").appName("new file").getOrCreate()
+
+# COMMAND ----------
+
+sc = spark.sparkContext
+
+# COMMAND ----------
+
+input_list =[["eshan"],["sanchi"],["ritika"]]
+
+# COMMAND ----------
+
+rdd = sc.parallelize(input_list)
+rdd.collect()
+
+# COMMAND ----------
+
+#convert RDD to DataFrame
+df = rdd.toDF()
+df.show()
+
+# COMMAND ----------
+
+#convert DF to rdd
+rdd2 = df.rdd
+type(rdd2)
+
+# COMMAND ----------
+
+
