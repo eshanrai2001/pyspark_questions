@@ -1,0 +1,40 @@
+dd-mm-yyyy to yyyy-MM-dd(Spark format)
+change data type, format of data or add new column
+
+# Databricks notebook source
+data = spark.read.csv("dbfs:/FileStore/shared_uploads/sanchirai669@gmail.com/empnew_csv___Sheet1.csv",header=True,inferSchema=True)
+data.show()
+
+# COMMAND ----------
+
+from pyspark.sql.functions import to_date
+data = data.withColumn("HIREDATE",to_date("HIREDATE",'dd-mm-yyyy')).fillna({"HIREDATE":'9999-12-31'})
+display(data)
+
+# COMMAND ----------
+
+from pyspark.sql.functions import date_format
+data = data.withColumn("YEAR",date_format("HIREDATE",'yyyy')).withColumn("MONTH",date_format("HIREDATE",'MM'))
+data.show()
+
+
+# COMMAND ----------
+
+data.write.format("delta").partitionBy("YEAR","MONTH").mode("overwrite").saveAsTable("empnewpart1")
+
+
+# COMMAND ----------
+
+# MAGIC %fs ls user/hive/warehouse/empnewpart1/YEAR=1980/MONTH=12/
+# MAGIC
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from empnewpart1 where YEAR=1980
+
+# COMMAND ----------
+
+
+
+
